@@ -20,6 +20,8 @@ Installation:
 -------------
 
 Copy to a bin folder of your choice. Personally, I make a symbolic link from ~/bin/
+Then, run chmod +x on the script.
+After that, configure your browser to run .torrent files with my script.
 
 Configuration:
 --------------

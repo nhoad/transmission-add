@@ -1,0 +1,29 @@
+transmission-add
+
+Dependencies:
+-------------
+Python 2.6, at least
+PyQt4/pygtk (whichever you prefer, the program will choose one if the other isn't found)
+transmissionrpc (http://bitbucket.org/blueluna/transmissionrpc/wiki/Home)
+
+
+General:
+--------
+transmission-add is a simple gui app to add torrents to different 
+transmission daemons easily.
+
+It's intended to be used with a web browser. I wrote it because there's no way
+for the browser to distinguish which server you want to add a particular 
+torrent to (i.e., video to a media server, iso to regular desktop)
+
+Installation:
+-------------
+
+Copy to a bin folder of your choice. Personally, I make a symbolic link from ~/bin/
+
+Configuration:
+--------------
+
+Configuration is done in the main.py file. Simply open it, the configuration 
+options are all at the top. If you would like to see a real config file 
+created for this program, see the AUTHORS file.

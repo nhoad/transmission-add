@@ -5,54 +5,59 @@ Author: Nathan Hoad
 Description: Adds torrents to transmission with nifty combo box
 '''
 
-from PyQt4 import QtGui, QtCore
+import pygtk
+pygtk.require('2.0')
+import gtk
+
 import sys
 import os
 import transmissionrpc
 
-# clients can be ip addresses or domain names
-clients = ('desktop', 'media')
+#servers can be ip addresses or domain names
+servers = ('desktop', 'media')
 
-class Dialog(QtGui.QWidget):
-    server_url = None
+class Dialog():
+    """Simple GUI to find out which server to add the torrent"""
 
-    def __init__(self, parent=None):
-        QtGui.QWidget.__init__(self, parent)
+    server = None
+    def __init__(self):
+        window = gtk.Window(gtk.WINDOW_TOPLEVEL)
+        window.connect('destroy', lambda w: gtk.main_quit())
+        combo_box = gtk.combo_box_entry_new_text()
+        combo_box.child.connect('changed', self.changed)
+        combo_box.child.connect('key_release_event', self.key_press)
 
-        self.setWindowTitle('Select A Transmission Host')
-        self.button = QtGui.QPushButton('OK', self)
+        for server in servers:
+            combo_box.append_text(server)
+        combo_box.set_active(0)
 
-        self.combo_box = QtGui.QComboBox(self)
-        self.combo_box.addItems(clients)
+        window.add(combo_box)
+        window.show_all()
 
-        self.connect(self.button, QtCore.SIGNAL('clicked()'), self.click)
+        window.show()
+        #combo_box = gtk.combo_box_entry_new_text()
 
-        vbox = QtGui.QVBoxLayout()
-        vbox.addStretch(1)
-        vbox.addWidget(self.combo_box)
-        vbox.addWidget(self.button)
-        self.setLayout(vbox)
-        self.resize(150, 20)
-
-    def keyPressEvent(self, event):
-        if event.key() == QtCore.Qt.Key_Return:
-            self.click()
-        elif event.key() == QtCore.Qt.Key_Escape:
-            self.close()
+    def key_press(self, widget, event):
+        keyname = gtk.gdk.keyval_name(event.keyval)
         
-    def click(self):
-        self.server_url = str(self.combo_box.currentText())
-        self.close()
+        if keyname in ("KP_Enter", "Return", "Enter"):
+            gtk.main_quit()
+        elif keyname == "Escape":
+            gtk.main_quit()
+            sys.exit(0)
 
-    def server(self):
-        return self.server_url
+    def changed(self, combo_box):
+        self.server = combo_box.get_text()
+
+        # in case it's just blank, make it None
+        if not self.server:
+            self.server = None
 
 def add_torrent(torrents):
     d = Dialog()
-    d.show()
-    app.exec_()
+    gtk.main()
 
-    server = d.server()
+    server = d.server
     print "connecting to", server
 
     if server is None:
@@ -67,8 +72,8 @@ def add_torrent(torrents):
         # pause the torrents right away!
         tc.stop(id)
         # remote the .torrent file!
-        if "http://" not in tor:
+        if 'http://' not in tor:
+            'deleting', tor
             os.remove(tor)
 
-app = QtGui.QApplication(sys.argv)
 add_torrent(sys.argv[1:])

@@ -3,9 +3,8 @@ transmission-add
 Dependencies:
 -------------
 Python 2.6, at least
-PyQt4/pygtk (whichever you prefer, the program will choose one if the other isn't found)
+pygtk > 2.0
 transmissionrpc (http://bitbucket.org/blueluna/transmissionrpc/wiki/Home)
-
 
 General:
 --------

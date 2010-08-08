@@ -56,6 +56,7 @@ class Dialog():
         vbox.add(hbox)
         
         window.add(vbox)
+        window.set_resizable(False)
         window.show_all()
         window.show()
 

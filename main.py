@@ -15,6 +15,8 @@ import transmissionrpc
 
 #servers can be ip addresses or domain names
 servers = ('desktop', 'media')
+delete = True
+start = False
 
 class Dialog():
     """Simple GUI to find out which server to add the torrent"""
@@ -22,20 +24,46 @@ class Dialog():
     server = None
     def __init__(self):
         window = gtk.Window(gtk.WINDOW_TOPLEVEL)
+        window.set_title('Select a server to add a client to')
         window.connect('destroy', lambda w: gtk.main_quit())
         combo_box = gtk.combo_box_entry_new_text()
-        combo_box.child.connect('changed', self.changed)
-        combo_box.child.connect('key_release_event', self.key_press)
 
         for server in servers:
             combo_box.append_text(server)
+
+        delete_check = gtk.CheckButton("_Delete torrent file")
+        pause_check = gtk.CheckButton("_Start when added")
+
+        delete_check.set_active(delete)
+        pause_check.set_active(start)
+
+        delete_check.connect("toggled", self.toggled, "delete")
+        pause_check.connect("toggled", self.toggled, "pause")
+
+        delete_check.connect('key_release_event', self.key_press)
+        pause_check.connect('key_release_event', self.key_press)
+
+        combo_box.child.connect('changed', self.changed)
+        combo_box.child.connect('key_release_event', self.key_press)
         combo_box.set_active(0)
 
-        window.add(combo_box)
-        window.show_all()
+        hbox = gtk.HBox(True, 2)
+        hbox.add(delete_check)
+        hbox.add(pause_check)
 
+        vbox = gtk.VBox(True, 2)
+        vbox.add(combo_box)
+        vbox.add(hbox)
+        
+        window.add(vbox)
+        window.show_all()
         window.show()
-        #combo_box = gtk.combo_box_entry_new_text()
+
+    def toggled(self, widget, data=None):
+        if data == "delete":
+            delete = widget.get_active()
+        if data == "pause":
+            start = widget.get_active()
 
     def key_press(self, widget, event):
         keyname = gtk.gdk.keyval_name(event.keyval)
@@ -70,10 +98,14 @@ def add_torrent(torrents):
         result = tc.add_url(tor)
         id = result.keys()[0]
         # pause the torrents right away!
-        tc.stop(id)
+        if not start:
+            print "stopping", id
+            tc.stop(id)
         # remote the .torrent file!
-        if 'http://' not in tor:
+        if 'http://' not in tor and delete:
             'deleting', tor
             os.remove(tor)
+    else:
+        print "No torrents to add!"
 
 add_torrent(sys.argv[1:])

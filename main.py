@@ -18,12 +18,13 @@ servers = ('desktop', 'media')
 delete = True
 start = False
 
+
 class Dialog():
     """Simple GUI to find out which server to add the torrent"""
-
     server = None
+
     def __init__(self):
-        window = gtk.Window(gtk.WINDOW_TOPLEVEL)
+        self.window = window = gtk.Window(gtk.WINDOW_TOPLEVEL)
         window.set_title('Select a server to add a client to')
         window.connect('destroy', lambda w: gtk.main_quit())
         combo_box = gtk.combo_box_entry_new_text()
@@ -43,6 +44,10 @@ class Dialog():
         delete_check.connect('key_release_event', self.key_press)
         pause_check.connect('key_release_event', self.key_press)
 
+        add_button = gtk.Button(stock=gtk.STOCK_ADD)
+
+        add_button.connect('clicked', self.clicked)
+
         combo_box.child.connect('changed', self.changed)
         combo_box.child.connect('key_release_event', self.key_press)
         combo_box.set_active(0)
@@ -51,10 +56,15 @@ class Dialog():
         hbox.add(delete_check)
         hbox.add(pause_check)
 
+        hbox_top = gtk.HBox(True, 2)
+
+        hbox_top.add(combo_box)
+        hbox_top.add(add_button)
+
         vbox = gtk.VBox(True, 2)
-        vbox.add(combo_box)
+        vbox.add(hbox_top)
         vbox.add(hbox)
-        
+
         window.add(vbox)
         window.set_resizable(False)
         window.show_all()
@@ -66,9 +76,12 @@ class Dialog():
         if data == "pause":
             start = widget.get_active()
 
+    def clicked(self, button):
+        gtk.main_quit()
+
     def key_press(self, widget, event):
         keyname = gtk.gdk.keyval_name(event.keyval)
-        
+
         if keyname in ("KP_Enter", "Return", "Enter"):
             gtk.main_quit()
         elif keyname == "Escape":
@@ -81,6 +94,7 @@ class Dialog():
         # in case it's just blank, make it None
         if not self.server:
             self.server = None
+
 
 def add_torrent(torrents):
     d = Dialog()
@@ -102,9 +116,10 @@ def add_torrent(torrents):
         if not start:
             print "stopping", id
             tc.stop(id)
+
         # remote the .torrent file!
         if 'http://' not in tor and delete:
-            'deleting', tor
+            print 'deleting', tor
             os.remove(tor)
     else:
         print "No torrents to add!"

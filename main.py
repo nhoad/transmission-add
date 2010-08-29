@@ -28,6 +28,8 @@ class Dialog():
         window.set_title('Select a server to add a client to')
         window.connect('destroy', lambda w: gtk.main_quit())
         combo_box = gtk.combo_box_entry_new_text()
+        self.delete = delete
+        self.start = start
 
         for server in servers:
             combo_box.append_text(server)
@@ -41,8 +43,8 @@ class Dialog():
         delete_check.connect("toggled", self.toggled, "delete")
         pause_check.connect("toggled", self.toggled, "pause")
 
-        delete_check.connect('key_release_event', self.key_press)
-        pause_check.connect('key_release_event', self.key_press)
+        delete_check.connect('key_release_event', self.toggled)
+        pause_check.connect('key_release_event', self.toggled)
 
         add_button = gtk.Button(stock=gtk.STOCK_ADD)
 
@@ -72,9 +74,9 @@ class Dialog():
 
     def toggled(self, widget, data=None):
         if data == "delete":
-            delete = widget.get_active()
+            self.delete = widget.get_active()
         if data == "pause":
-            start = widget.get_active()
+            self.start = widget.get_active()
 
     def clicked(self, button):
         gtk.main_quit()
@@ -107,6 +109,8 @@ def add_torrent(torrents):
         print "No server was specified!"
         sys.exit(1)
 
+    start = d.start
+    delete = d.delete
     tc = transmissionrpc.Client(server, port=9091)
 
     for tor in torrents:

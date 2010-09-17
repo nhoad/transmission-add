@@ -12,6 +12,10 @@ import gtk
 import sys
 import os
 import transmissionrpc
+import time
+
+import threading
+gtk.gdk.threads_init()
 
 #servers can be ip addresses or domain names
 servers = ('desktop', 'media')
@@ -19,13 +23,30 @@ delete = True
 start = False
 
 
+class AutoTimer(threading.Thread):
+    """docstring for AutoTimer"""
+    def __init__(self, dialog, time_to_wait):
+        super(AutoTimer, self).__init__()
+        print "Hello from AutoTimer!"
+        self.dialog = dialog
+        self.time_to_wait = time_to_wait
+
+    def run(self):
+        for i in range(self.time_to_wait, 0, -1):
+            self.dialog.label.set_text("Auto-Adding in %d" % i)
+            time.sleep(1)
+
+        self.dialog.hide()
+
+        print "Wahhh??"
+
 class Dialog():
     """Simple GUI to find out which server to add the torrent"""
     server = None
 
     def __init__(self):
         self.window = window = gtk.Window(gtk.WINDOW_TOPLEVEL)
-        window.set_title('Select a server to add a client to')
+        window.set_title('Select a server to add %s to' % sys.argv[1])
         window.connect('destroy', lambda w: gtk.main_quit())
         combo_box = gtk.combo_box_entry_new_text()
         self.delete = delete
@@ -58,6 +79,9 @@ class Dialog():
         hbox.add(delete_check)
         hbox.add(pause_check)
 
+        self.label = gtk.Label("");
+        hbox.add(self.label)
+
         hbox_top = gtk.HBox(True, 2)
 
         hbox_top.add(combo_box)
@@ -69,8 +93,12 @@ class Dialog():
 
         window.add(vbox)
         window.set_resizable(False)
+
         window.show_all()
         window.show()
+
+    def hide(self):
+        gtk.main_quit()
 
     def toggled(self, widget, data=None):
         if data == "delete":
@@ -100,6 +128,10 @@ class Dialog():
 
 def add_torrent(torrents):
     d = Dialog()
+    t = AutoTimer(d, 5)
+    # this drops threads when the user closes the program and such
+    t.daemon = True
+    t.start()
     gtk.main()
 
     server = d.server
@@ -125,7 +157,5 @@ def add_torrent(torrents):
         if 'http://' not in tor and delete:
             print 'deleting', tor
             os.remove(tor)
-    else:
-        print "No torrents to add!"
 
 add_torrent(sys.argv[1:])

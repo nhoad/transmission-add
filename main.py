@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python2
 '''
 File: main.py
 Author: Nathan Hoad
@@ -18,7 +18,7 @@ import threading
 gtk.gdk.threads_init()
 
 #servers can be ip addresses or domain names
-servers = ('desktop', 'media')
+servers = ('desktop', '192.168.1.75')
 delete = True
 start = False
 
@@ -146,6 +146,7 @@ def add_torrent(torrents):
     tc = transmissionrpc.Client(server, port=9091)
 
     for tor in torrents:
+        print "adding", tor
         result = tc.add_url(tor)
         id = result.keys()[0]
         # pause the torrents right away!
